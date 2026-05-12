@@ -12,7 +12,7 @@
 <!-- BOOT -->
 <div id="boot">
     <h1>MiniOS</h1>
-    <p id="bootText">Booting system...</p>
+    <p id="bootText">Starting system...</p>
 </div>
 
 <!-- DESKTOP -->
@@ -34,21 +34,23 @@
     </div>
 
     <!-- WINDOWS -->
+
     <div class="window hidden" id="browserWindow">
-        <div class="titlebar" onmousedown="drag(event,'browserWindow')">
+        <div class="titlebar" onmousedown="dragStart(event,'browserWindow')">
             <span>Browser</span>
             <div>
                 <button onclick="minimize('browserWindow')">_</button>
                 <button onclick="closeWindow('browserWindow')">x</button>
             </div>
         </div>
+
         <input id="url">
         <button onclick="go()">Go</button>
         <iframe id="frame"></iframe>
     </div>
 
     <div class="window hidden" id="filesWindow">
-        <div class="titlebar" onmousedown="drag(event,'filesWindow')">
+        <div class="titlebar" onmousedown="dragStart(event,'filesWindow')">
             <span>Files</span>
             <button onclick="closeWindow('filesWindow')">x</button>
         </div>
@@ -60,7 +62,7 @@
     </div>
 
     <div class="window hidden" id="notesWindow">
-        <div class="titlebar" onmousedown="drag(event,'notesWindow')">
+        <div class="titlebar" onmousedown="dragStart(event,'notesWindow')">
             <span>Notes</span>
             <button onclick="closeWindow('notesWindow')">x</button>
         </div>
@@ -70,7 +72,7 @@
     </div>
 
     <div class="window hidden" id="aiWindow">
-        <div class="titlebar" onmousedown="drag(event,'aiWindow')">
+        <div class="titlebar" onmousedown="dragStart(event,'aiWindow')">
             <span>AI</span>
             <button onclick="closeWindow('aiWindow')">x</button>
         </div>
@@ -86,16 +88,9 @@
 <div id="taskbar">
     <button onclick="toggleStart()">Start</button>
     <div id="taskApps"></div>
-
-    <div id="startMenu" class="hidden">
-        <div onclick="openApp('browser')">Browser</div>
-        <div onclick="openApp('files')">Files</div>
-        <div onclick="openApp('notes')">Notes</div>
-        <div onclick="openApp('ai')">AI</div>
-    </div>
 </div>
 
-<!-- RIGHT CLICK MENU -->
+<!-- CONTEXT MENU -->
 <div id="contextMenu" class="hidden">
     <div onclick="setWallpaperPrompt()">Wallpaper</div>
     <div onclick="createFolder()">New Folder</div>
