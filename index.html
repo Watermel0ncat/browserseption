@@ -2,19 +2,27 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>MiniOS Ultimate Stable</title>
+<title>MiniOS Ultimate</title>
+
+<!-- IMPORTANT: ensures CSS loads -->
 <link rel="stylesheet" href="style.css">
+
+<!-- IMPORTANT: ensures JS loads AFTER DOM parsing -->
 <script defer src="script.js"></script>
 </head>
 
 <body>
 
+<!-- ROOT DESKTOP (your JS depends on this) -->
 <div id="desktop"></div>
 
+<!-- SIMPLE CONTROL BAR (GUARANTEED TRIGGER POINTS) -->
 <div id="taskbar">
-    <button onclick="openBrowser()">🌐 Browser</button>
-    <button onclick="openAI()">🤖 AI</button>
-    <div id="taskApps"></div>
+
+    <!-- These must exist so YOU can trigger functions manually -->
+    <button onclick="openBrowser()">Open Browser</button>
+    <button onclick="openAI()">Open AI</button>
+
 </div>
 
 </body>
