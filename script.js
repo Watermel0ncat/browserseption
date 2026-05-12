@@ -1,98 +1,25 @@
-body {
-    margin:0;
-    font-family:Segoe UI, Arial;
-    overflow:hidden;
-}
-
-#desktop {
-    width:100vw;
-    height:100vh;
-    background:#1e293b;
-}
-
-/* WINDOW */
-.window {
-    position:absolute;
-    width:600px;
-    height:400px;
-    background:#111827;
-    color:white;
-    border-radius:8px;
-    overflow:hidden;
-    box-shadow:0 10px 30px rgba(0,0,0,0.4);
-}
-
-.titlebar {
-    background:#0f172a;
-    padding:6px;
-    display:flex;
-    justify-content:space-between;
-    cursor:move;
-}
-
-/* TASKBAR */
-#taskbar {
-    position:fixed;
-    bottom:0;
-    width:100%;
-    height:45px;
-    background:#0b1220;
-    display:flex;
-    align-items:center;
-    gap:10px;
-    padding-left:10px;
-}
-
-.taskBtn {
-    background:#1f2937;
-    color:white;
-    border:none;
-    padding:5px 10px;
-    cursor:pointer;
-}
-
-/* BROWSER UI */
-.tabbar {
-    display:flex;
-    gap:5px;
-    background:#1f2937;
-    padding:5px;
-}
-
-.tab {
-    padding:4px 8px;
-    background:#374151;
-    cursor:pointer;
-    border-radius:4px;
-    font-size:12px;
-}
-
-.tab.active {
-    background:#60a5fa;
-    color:black;
-}
-
-.content iframe {
-    width:100%;
-    height:300px;
-    border:none;
-}// =========================
+// =========================
 // CORE OS STATE
 // =========================
 
-window.OS = {
+let OS = {
     z: 10,
-    drag: { el:null, x:0, y:0 }
+    windows: {},
+    activeWindow: null,
+    drag: null
 };
 
 // =========================
-// WINDOW SYSTEM (SAFE CORE)
+// WINDOW SYSTEM
 // =========================
 
-function createWindow(title, content) {
+function createWindow(title, innerHTML) {
+
+    const id = "win_" + Date.now();
 
     const win = document.createElement("div");
     win.className = "window";
+    win.id = id;
 
     win.style.left = "100px";
     win.style.top = "100px";
@@ -101,78 +28,186 @@ function createWindow(title, content) {
     win.innerHTML = `
         <div class="titlebar">
             <span>${title}</span>
-            <button onclick="this.closest('.window').remove()">X</button>
+            <button onclick="closeWindow('${id}')">X</button>
         </div>
-        <div class="content">${content}</div>
+        <div class="content">${innerHTML}</div>
     `;
 
-    // DRAGGING
-    let dragging = false;
-    let offsetX = 0;
-    let offsetY = 0;
+    document.getElementById("desktop").appendChild(win);
+
+    OS.windows[id] = win;
+
+    bringToFront(id);
+    makeDraggable(win);
+
+    updateTaskbar();
+
+    return win;
+}
+
+// =========================
+// DRAG SYSTEM
+// =========================
+
+function makeDraggable(win) {
 
     const bar = win.querySelector(".titlebar");
 
     bar.onmousedown = (e) => {
-        dragging = true;
-        offsetX = e.clientX - win.offsetLeft;
-        offsetY = e.clientY - win.offsetTop;
+        OS.drag = {
+            el: win,
+            x: e.clientX - win.offsetLeft,
+            y: e.clientY - win.offsetTop
+        };
+        bringToFront(win.id);
     };
+}
 
-    document.onmousemove = (e) => {
-        if (!dragging) return;
-        win.style.left = (e.clientX - offsetX) + "px";
-        win.style.top = (e.clientY - offsetY) + "px";
-    };
+document.addEventListener("mousemove", (e) => {
+    if (!OS.drag) return;
 
-    document.onmouseup = () => dragging = false;
+    OS.drag.el.style.left = (e.clientX - OS.drag.x) + "px";
+    OS.drag.el.style.top = (e.clientY - OS.drag.y) + "px";
+});
 
-    document.getElementById("desktop").appendChild(win);
+document.addEventListener("mouseup", () => {
+    OS.drag = null;
+});
+
+// =========================
+// TASKBAR
+// =========================
+
+function updateTaskbar() {
+
+    const bar = document.getElementById("taskApps");
+    bar.innerHTML = "";
+
+    Object.keys(OS.windows).forEach(id => {
+
+        const btn = document.createElement("button");
+        btn.className = "taskBtn";
+        btn.innerText = id;
+
+        btn.onclick = () => {
+            const w = OS.windows[id];
+            w.style.display = "block";
+            bringToFront(id);
+        };
+
+        bar.appendChild(btn);
+    });
+}
+
+function bringToFront(id) {
+    const win = OS.windows[id];
+    if (!win) return;
+    win.style.zIndex = ++OS.z;
+    OS.activeWindow = id;
 }
 
 // =========================
-// BROWSER (FIXED + WORKING)
+// CLOSE
+// =========================
+
+function closeWindow(id) {
+    OS.windows[id].remove();
+    delete OS.windows[id];
+    updateTaskbar();
+}
+
+// =========================
+// BROWSER (FULL TAB SYSTEM)
 // =========================
 
 function openBrowser() {
 
-    createWindow("Browser", `
-        <input id="url" placeholder="https://example.com">
-        <button onclick="
-            let u = document.getElementById('url').value;
-            if (!u.startsWith('http')) u = 'https://' + u;
-
-            if (!window._frame) {
-                window._frame = document.createElement('iframe');
-                window._frame.style.width='100%';
-                window._frame.style.height='80%';
-                document.querySelector('.window:last-child .content').appendChild(window._frame);
-            }
-
-            window._frame.src = u;
-        ">Go</button>
+    const win = createWindow("Browser", `
+        <div class="tabbar"></div>
+        <input class="url" placeholder="https://example.com">
+        <button class="go">Go</button>
+        <button class="newTab">+ Tab</button>
+        <div class="content"></div>
     `);
+
+    setupBrowser(win);
+}
+
+function setupBrowser(win) {
+
+    const tabbar = win.querySelector(".tabbar");
+    const content = win.querySelector(".content");
+    const input = win.querySelector(".url");
+
+    let tabs = [];
+    let active = 0;
+
+    function addTab(url = "https://example.com") {
+
+        const tabIndex = tabs.length;
+
+        const tab = document.createElement("div");
+        tab.className = "tab";
+        tab.innerText = "Tab " + (tabIndex + 1);
+
+        const frame = document.createElement("iframe");
+        frame.src = url;
+
+        tabs.push({ tab, frame });
+
+        tabbar.appendChild(tab);
+        content.appendChild(frame);
+
+        switchTab(tabIndex);
+
+        tab.onclick = () => switchTab(tabIndex);
+    }
+
+    function switchTab(i) {
+
+        tabs.forEach((t, idx) => {
+            t.frame.style.display = idx === i ? "block" : "none";
+            t.tab.classList.toggle("active", idx === i);
+        });
+
+        active = i;
+    }
+
+    win.querySelector(".go").onclick = () => {
+        let url = input.value;
+        if (!url.startsWith("http")) url = "https://" + url;
+        tabs[active].frame.src = url;
+    };
+
+    win.querySelector(".newTab").onclick = () => addTab();
+
+    addTab();
 }
 
 // =========================
-// AI (SIMPLE BUT STABLE)
+// AI APP
 // =========================
 
 function openAI() {
 
-    createWindow("AI", `
-        <input id="aiInput" placeholder="Ask something">
-        <button onclick="
-            let q = document.getElementById('aiInput').value;
-
-            let response =
-                q.includes('hello') ? 'Hello' :
-                q.includes('reverse') ? q.split(' ').reverse().join(' ') :
-                'AI: ' + q;
-
-            document.getElementById('aiOut').innerText = response;
-        ">Ask</button>
-
-        <div id="aiOut"></div>
+    const win = createWindow("AI", `
+        <input class="aiInput" placeholder="Ask...">
+        <button class="ask">Ask</button>
+        <div class="out"></div>
     `);
+
+    const input = win.querySelector(".aiInput");
+    const out = win.querySelector(".out");
+
+    win.querySelector(".ask").onclick = () => {
+
+        let q = input.value.toLowerCase();
+
+        let response =
+            q.includes("hello") ? "Hello" :
+            q.includes("windows") ? "MiniOS running" :
+            "AI: " + q.split(" ").reverse().join(" ");
+
+        out.innerText = response;
+    };
 }
