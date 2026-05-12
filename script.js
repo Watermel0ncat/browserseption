@@ -1,4 +1,161 @@
-// =========================
+let fs = JSON.parse(localStorage.getItem("fs") || "[]");
+let currentFile = null;
+let dragTarget = null;
+let offsetX = 0;
+let offsetY = 0;
+
+// ---------------- BOOT ----------------
+
+setTimeout(() => {
+    document.getElementById("bootText").innerText = "Starting UI...";
+}, 1000);
+
+setTimeout(() => {
+    document.getElementById("boot").style.display = "none";
+}, 2000);
+
+// ---------------- WINDOWS ----------------
+
+function openApp(id) {
+    const el = document.getElementById(id + "Window");
+    if (!el) return;
+    el.classList.remove("hidden");
+}
+
+function closeWindow(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.add("hidden");
+}
+
+// ---------------- DRAG ----------------
+
+function drag(e, id) {
+    dragTarget = document.getElementById(id);
+    if (!dragTarget) return;
+
+    offsetX = e.clientX - dragTarget.offsetLeft;
+    offsetY = e.clientY - dragTarget.offsetTop;
+}
+
+document.addEventListener("mousemove", e => {
+    if (!dragTarget) return;
+    dragTarget.style.left = (e.clientX - offsetX) + "px";
+    dragTarget.style.top = (e.clientY - offsetY) + "px";
+});
+
+document.addEventListener("mouseup", () => dragTarget = null);
+
+// ---------------- BROWSER ----------------
+
+function go() {
+    let u = document.getElementById("url").value;
+    if (!u) return;
+
+    if (!u.startsWith("http")) u = "https://" + u;
+
+    document.getElementById("frame").src = u;
+}
+
+// ---------------- FILE SYSTEM ----------------
+
+function createFile() {
+    let name = prompt("File name:");
+    if (!name) return;
+
+    fs.push({ name, content: "" });
+    saveFS();
+    renderFS();
+}
+
+function renderFS() {
+    const list = document.getElementById("fileList");
+    if (!list) return;
+
+    list.innerHTML = "";
+
+    fs.forEach((f, i) => {
+        let div = document.createElement("div");
+        div.innerText = f.name;
+
+        div.onclick = () => {
+            currentFile = i;
+            document.getElementById("noteArea").value = f.content;
+        };
+
+        list.appendChild(div);
+    });
+}
+
+function saveFS() {
+    localStorage.setItem("fs", JSON.stringify(fs));
+}
+
+// ---------------- NOTES ----------------
+
+function saveNote() {
+    if (currentFile === null) return;
+
+    fs[currentFile].content =
+        document.getElementById("noteArea").value;
+
+    saveFS();
+    renderFS();
+}
+
+// ---------------- AI ----------------
+
+function askAI() {
+    let q = document.getElementById("aiInput").value.toLowerCase();
+
+    let r = "Processing...";
+
+    if (q.includes("hello")) r = "Hello user.";
+    else if (q.includes("time")) r = "Time is simulated.";
+    else if (q.length < 3) r = "Input too short.";
+    else r = "System response: " + Math.random().toString(36).substring(2,7);
+
+    document.getElementById("aiOutput").innerText = r;
+}
+
+// ---------------- WALLPAPER ----------------
+
+function setWallpaper() {
+    const file = document.getElementById("wallpaperFile").files[0];
+    const input = document.getElementById("wallpaperInput").value;
+
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = e => applyWallpaper(e.target.result);
+        reader.readAsDataURL(file);
+        return;
+    }
+
+    applyWallpaper(input);
+}
+
+function applyWallpaper(val) {
+    if (!val) return;
+
+    const d = document.getElementById("desktop");
+
+    if (val.startsWith("http") || val.startsWith("data:")) {
+        d.style.background = `url(${val}) center/cover`;
+    } else {
+        d.style.background = val;
+    }
+
+    localStorage.setItem("wallpaper", val);
+}
+
+// ---------------- INIT ----------------
+
+window.onload = () => {
+    renderFS();
+
+    const w = localStorage.getItem("wallpaper");
+    if (w) applyWallpaper(w);
+};// =========================
 // BOOT
 // =========================
 
