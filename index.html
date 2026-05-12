@@ -1,18 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html>
 <head>
 <meta charset="UTF-8">
-<title>MiniOS</title>
+<title>MiniOS Stable</title>
 <link rel="stylesheet" href="style.css">
 </head>
 
 <body class="theme-blue">
 
-<!-- BOOT SCREEN -->
+<!-- BOOT -->
 <div id="boot">
     <h1>MiniOS Booting...</h1>
-    <p id="bootText">Loading system...</p>
+    <p id="bootText">Loading...</p>
 </div>
 
 <!-- DESKTOP -->
@@ -20,40 +19,32 @@
 
     <!-- ICONS -->
     <div id="icons">
-        <div class="icon" onclick="openApp('browser')">🌐 Browser</div>
-        <div class="icon" onclick="openApp('files')">📁 Files</div>
-        <div class="icon" onclick="openApp('notes')">📝 Notes</div>
-        <div class="icon" onclick="openApp('ai')">🤖 AI</div>
+        <div onclick="openApp('browser')">🌐 Browser</div>
+        <div onclick="openApp('files')">📁 Files</div>
+        <div onclick="openApp('notes')">📝 Notes</div>
+        <div onclick="openApp('ai')">🤖 AI</div>
     </div>
 
-    <!-- WALLPAPER CONTROLS -->
+    <!-- WALLPAPER -->
     <div id="wallpaperPanel">
-
-        <input id="wallpaperInput" placeholder="Color or image URL">
-
-        <input type="file" id="wallpaperFile" accept="image/*">
-
-        <button onclick="setWallpaper()">Apply Wallpaper</button>
-
+        <input id="wallpaperInput" placeholder="Color or URL">
+        <input type="file" id="wallpaperFile">
+        <button onclick="setWallpaper()">Apply</button>
     </div>
 
     <!-- WINDOWS -->
     <div id="windows">
 
-        <!-- BROWSER -->
         <div class="window hidden" id="browserWindow">
             <div class="titlebar" onmousedown="drag(event,'browserWindow')">
                 <span>Browser</span>
                 <button onclick="closeWindow('browserWindow')">x</button>
             </div>
-
-            <input id="url" placeholder="url">
+            <input id="url">
             <button onclick="go()">Go</button>
-
             <iframe id="frame"></iframe>
         </div>
 
-        <!-- FILES -->
         <div class="window hidden" id="filesWindow">
             <div class="titlebar" onmousedown="drag(event,'filesWindow')">
                 <span>Files</span>
@@ -64,7 +55,6 @@
             <div id="fileList"></div>
         </div>
 
-        <!-- NOTES -->
         <div class="window hidden" id="notesWindow">
             <div class="titlebar" onmousedown="drag(event,'notesWindow')">
                 <span>Notes</span>
@@ -75,7 +65,6 @@
             <button onclick="saveNote()">Save</button>
         </div>
 
-        <!-- AI -->
         <div class="window hidden" id="aiWindow">
             <div class="titlebar" onmousedown="drag(event,'aiWindow')">
                 <span>AI</span>
@@ -84,7 +73,6 @@
 
             <input id="aiInput">
             <button onclick="askAI()">Ask</button>
-
             <div id="aiOutput"></div>
         </div>
 
@@ -93,7 +81,6 @@
 
 <!-- TASKBAR -->
 <div id="taskbar">
-
     <button onclick="toggleStart()">Start</button>
 
     <div id="startMenu" class="hidden">
@@ -102,7 +89,6 @@
         <div onclick="openApp('notes')">Notes</div>
         <div onclick="openApp('ai')">AI</div>
     </div>
-
 </div>
 
 <script src="script.js"></script>
