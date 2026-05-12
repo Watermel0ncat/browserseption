@@ -1,4 +1,210 @@
 // =========================
+// GLOBAL OS STATE
+// =========================
+
+window.OS = {
+    fs: JSON.parse(localStorage.getItem("fs") || "[]"),
+    aiMemory: JSON.parse(localStorage.getItem("aiMemory") || "[]"),
+    currentFile: null,
+    drag: { el: null, x: 0, y: 0 },
+    z: 10
+};
+
+// =========================
+// WINDOW SYSTEM
+// =========================
+
+function openApp(id) {
+    const w = document.getElementById(id + "Window");
+    if (!w) return;
+    w.classList.remove("hidden");
+    bring(w);
+}
+
+function closeWindow(id) {
+    const w = document.getElementById(id);
+    if (w) w.classList.add("hidden");
+}
+
+function minimize(id) {
+    const w = document.getElementById(id);
+    if (w) w.classList.add("hidden");
+}
+
+function bring(el) {
+    el.style.zIndex = ++OS.z;
+}
+
+// =========================
+// DRAG SYSTEM (SAFE)
+// =========================
+
+function dragStart(e, id) {
+    OS.drag.el = document.getElementById(id);
+    if (!OS.drag.el) return;
+
+    OS.drag.x = e.clientX - OS.drag.el.offsetLeft;
+    OS.drag.y = e.clientY - OS.drag.el.offsetTop;
+}
+
+document.addEventListener("mousemove", e => {
+    if (!OS.drag.el) return;
+
+    OS.drag.el.style.left = (e.clientX - OS.drag.x) + "px";
+    OS.drag.el.style.top = (e.clientY - OS.drag.y) + "px";
+});
+
+document.addEventListener("mouseup", () => {
+    OS.drag.el = null;
+});
+
+// =========================
+// BROWSER
+// =========================
+
+function go() {
+    let url = document.getElementById("url").value;
+    if (!url) return;
+
+    if (!url.startsWith("http")) {
+        url = "https://" + url;
+    }
+
+    const frame = document.getElementById("frame");
+
+    try {
+        frame.src = url;
+    } catch (e) {
+        window.open(url, "_blank");
+    }
+}
+
+// =========================
+// FILE SYSTEM
+// =========================
+
+function createFile() {
+    let name = prompt("File name");
+    if (!name) return;
+
+    OS.fs.push({ type:"file", name, content:"" });
+    saveFS();
+    renderFS();
+}
+
+function createFolder() {
+    let name = prompt("Folder name");
+    if (!name) return;
+
+    OS.fs.push({ type:"folder", name, children:[] });
+    saveFS();
+    renderFS();
+}
+
+function renderFS() {
+    const list = document.getElementById("fileList");
+    if (!list) return;
+
+    list.innerHTML = "";
+
+    OS.fs.forEach((f,i) => {
+        let d = document.createElement("div");
+        d.innerText = f.type === "folder" ? "📁 " + f.name : "📄 " + f.name;
+
+        d.onclick = () => {
+            if (f.type === "file") {
+                OS.currentFile = i;
+                document.getElementById("noteArea").value = f.content;
+            }
+        };
+
+        list.appendChild(d);
+    });
+}
+
+function saveFS() {
+    localStorage.setItem("fs", JSON.stringify(OS.fs));
+}
+
+// =========================
+// NOTES
+// =========================
+
+function saveNote() {
+    if (OS.currentFile === null) return;
+
+    OS.fs[OS.currentFile].content =
+        document.getElementById("noteArea").value;
+
+    saveFS();
+    renderFS();
+}
+
+// =========================
+// AI
+// =========================
+
+function askAI() {
+    const input = document.getElementById("aiInput");
+    const out = document.getElementById("aiOutput");
+
+    let q = input.value.toLowerCase();
+
+    OS.aiMemory.push(q);
+    if (OS.aiMemory.length > 15) OS.aiMemory.shift();
+
+    localStorage.setItem("aiMemory", JSON.stringify(OS.aiMemory));
+
+    let response;
+
+    if (q.includes("hello")) response = "Hello.";
+    else if (q.includes("memory")) response = OS.aiMemory.slice(-5).join(" | ");
+    else response = "Processed: " + q.split(" ").reverse().join(" ");
+
+    out.innerText = response;
+}
+
+// =========================
+// WALLPAPER
+// =========================
+
+function setWallpaper() {
+    const file = document.getElementById("wallpaperFile").files[0];
+    const val = document.getElementById("wallpaperInput").value;
+
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = e => applyWallpaper(e.target.result);
+        reader.readAsDataURL(file);
+        return;
+    }
+
+    applyWallpaper(val);
+}
+
+function applyWallpaper(val) {
+    const d = document.getElementById("desktop");
+    if (!val || !d) return;
+
+    if (val.startsWith("http") || val.startsWith("data:")) {
+        d.style.background = `url(${val}) center/cover`;
+    } else {
+        d.style.background = val;
+    }
+
+    localStorage.setItem("wallpaper", val);
+}
+
+// =========================
+// INIT
+// =========================
+
+window.onload = () => {
+    renderFS();
+
+    const saved = localStorage.getItem("wallpaper");
+    if (saved) applyWallpaper(saved);
+};// =========================
 // SAFE GLOBAL OS STATE
 // =========================
 
