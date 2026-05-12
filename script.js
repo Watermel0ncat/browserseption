@@ -22,6 +22,8 @@ function createWindow(title, contentHTML) {
 
     win.style.left = "120px";
     win.style.top = "80px";
+    win.style.width = "600px";
+    win.style.height = "420px";
     win.style.zIndex = ++OS.z;
 
     win.innerHTML = `
@@ -29,7 +31,10 @@ function createWindow(title, contentHTML) {
             <span>${title}</span>
             <button onclick="closeWindow('${id}')">X</button>
         </div>
+
         <div class="content">${contentHTML}</div>
+
+        <div class="resizer"></div>
     `;
 
     document.getElementById("desktop").appendChild(win);
@@ -38,6 +43,7 @@ function createWindow(title, contentHTML) {
 
     bringToFront(id);
     makeDraggable(win);
+    makeResizable(win);
     updateTaskbar();
 
     return win;
@@ -85,6 +91,43 @@ document.addEventListener("mouseup", () => {
 });
 
 // =========================
+// RESIZE SYSTEM
+// =========================
+
+function makeResizable(win) {
+
+    const resizer = win.querySelector(".resizer");
+
+    let startX, startY, startW, startH;
+
+    resizer.onmousedown = (e) => {
+
+        e.preventDefault();
+        bringToFront(win.id);
+
+        startX = e.clientX;
+        startY = e.clientY;
+
+        startW = parseInt(getComputedStyle(win).width, 10);
+        startH = parseInt(getComputedStyle(win).height, 10);
+
+        document.onmousemove = resizeMove;
+        document.onmouseup = stopResize;
+    };
+
+    function resizeMove(e) {
+
+        win.style.width = Math.max(250, startW + (e.clientX - startX)) + "px";
+        win.style.height = Math.max(150, startH + (e.clientY - startY)) + "px";
+    }
+
+    function stopResize() {
+        document.onmousemove = null;
+        document.onmouseup = null;
+    }
+}
+
+// =========================
 // TASKBAR
 // =========================
 
@@ -99,7 +142,7 @@ function updateTaskbar() {
 
         const btn = document.createElement("button");
         btn.className = "taskBtn";
-        btn.innerText = "Window";
+        btn.innerText = "App";
 
         btn.onclick = () => {
             OS.windows[id].style.display = "block";
@@ -111,7 +154,7 @@ function updateTaskbar() {
 }
 
 // =========================
-// BROWSER (CLEAN CHROME ENGINE)
+// BROWSER (CHROME-LEVEL)
 // =========================
 
 function openBrowser() {
@@ -133,7 +176,7 @@ function openBrowser() {
 }
 
 // =========================
-// FIXED TAB ENGINE (STATE-DRIVEN)
+// TAB ENGINE (FIXED STATE MODEL)
 // =========================
 
 function setupBrowser(win) {
@@ -181,7 +224,6 @@ function setupBrowser(win) {
         render();
     }
 
-    // NAVIGATE
     win.querySelector(".go").onclick = () => {
         let url = input.value;
         if (!url.startsWith("http")) url = "https://" + url;
@@ -191,12 +233,8 @@ function setupBrowser(win) {
         }
     };
 
-    // NEW TAB
-    win.querySelector(".newTab").onclick = () => {
-        addTab();
-    };
+    win.querySelector(".newTab").onclick = () => addTab();
 
-    // SPLIT VIEW
     win.querySelector(".split").onclick = () => {
 
         if (tabs.length < 2) return;
@@ -214,7 +252,6 @@ function setupBrowser(win) {
         viewport.appendChild(b);
     };
 
-    // INIT
     addTab();
 }
 
