@@ -1,247 +1,182 @@
 // =========================
-// STATE
+// BOOT
 // =========================
 
-let tabs = [];
-let currentTab = 0;
+setTimeout(() => {
+    document.getElementById("bootText").innerText = "Starting UI...";
+}, 1000);
 
-let defaultBackground =
-    localStorage.getItem("defaultBackground")
-    || "white";
-
-// =========================
-// ELEMENTS
-// =========================
-
-const frame =
-    document.getElementById("browserFrame");
-
-const tabsDiv =
-    document.getElementById("tabs");
-
-const urlInput =
-    document.getElementById("urlInput");
+setTimeout(() => {
+    document.getElementById("boot").classList.add("hidden");
+}, 2500);
 
 // =========================
-// TABS
+// WINDOW SYSTEM
 // =========================
 
-function newTab(url = "https://example.com") {
+let z = 10;
 
-    tabs.push(url);
-    currentTab = tabs.length - 1;
-
-    applyBackground();
-    renderTabs();
-    loadTab();
+function openApp(id){
+    document.getElementById(id+"Window").classList.remove("hidden");
+    bring(id+"Window");
 }
 
-function closeTab(index) {
+function closeWindow(id){
+    document.getElementById(id).classList.add("hidden");
+}
 
-    if (tabs.length === 1) {
-        tabs[0] = "https://example.com";
+function bring(id){
+    let w=document.getElementById(id);
+    w.style.zIndex=++z;
+}
+
+// =========================
+// DRAGGING
+// =========================
+
+let dragEl,ox,oy;
+
+function drag(e,id){
+    dragEl=document.getElementById(id);
+    ox=e.clientX-dragEl.offsetLeft;
+    oy=e.clientY-dragEl.offsetTop;
+    bring(id);
+}
+
+document.addEventListener("mousemove",e=>{
+    if(!dragEl) return;
+    dragEl.style.left=(e.clientX-ox)+"px";
+    dragEl.style.top=(e.clientY-oy)+"px";
+});
+
+document.addEventListener("mouseup",()=>dragEl=null);
+
+// =========================
+// START MENU
+// =========================
+
+function toggleStart(){
+    document.getElementById("startMenu").classList.toggle("hidden");
+}
+
+// =========================
+// BROWSER
+// =========================
+
+function go(){
+    let u=document.getElementById("url").value;
+    if(!u.startsWith("http")) u="https://"+u;
+    document.getElementById("frame").src=u;
+}
+
+// =========================
+// FILE SYSTEM
+// =========================
+
+let fs=JSON.parse(localStorage.getItem("fs")||"[]");
+
+function createFile(){
+    let name=prompt("File name:");
+    fs.push({name,content:""});
+    saveFS();
+    renderFS();
+}
+
+function renderFS(){
+    let d=document.getElementById("fileList");
+    d.innerHTML="";
+    fs.forEach((f,i)=>{
+        let el=document.createElement("div");
+        el.innerText=f.name;
+        el.onclick=()=>{
+            document.getElementById("noteArea").value=f.content;
+            window.currentFile=i;
+        };
+        d.appendChild(el);
+    });
+}
+
+function saveFS(){
+    localStorage.setItem("fs",JSON.stringify(fs));
+}
+
+// =========================
+// NOTES
+// =========================
+
+function saveNote(){
+    let i=window.currentFile;
+    if(i==null) return;
+    fs[i].content=document.getElementById("noteArea").value;
+    saveFS();
+    renderFS();
+}
+
+// =========================
+// AI (slightly smarter)
+// =========================
+
+function askAI(){
+    let q=document.getElementById("aiInput").value.toLowerCase();
+
+    let r;
+
+    if(q.includes("hello")) r="Hello user.";
+    else if(q.includes("time")) r="Time is simulated.";
+    else if(q.includes("what")) r="Processing query...";
+    else {
+        let w=["kernel","quantum","sync","node","matrix"];
+        r="Response: "+w[Math.random()*w.length|0];
+    }
+
+    document.getElementById("aiOutput").innerText=r;
+}
+
+// =========================
+// WALLPAPER SYSTEM (NEW)
+// =========================
+
+function setWallpaper(){
+
+    let file=document.getElementById("wallpaperFile").files[0];
+    let url=document.getElementById("wallpaperInput").value;
+
+    if(file){
+
+        let reader=new FileReader();
+
+        reader.onload=function(e){
+            applyWallpaper(e.target.result);
+        };
+
+        reader.readAsDataURL(file);
+        return;
+    }
+
+    applyWallpaper(url);
+}
+
+function applyWallpaper(val){
+
+    localStorage.setItem("wallpaper",val);
+
+    const d=document.getElementById("desktop");
+
+    if(val.startsWith("http")||val.startsWith("data:")){
+        d.style.background=`url(${val})`;
     } else {
-        tabs.splice(index, 1);
-        currentTab = Math.max(0, currentTab - 1);
+        d.style.background=val;
     }
-
-    renderTabs();
-    loadTab();
 }
 
-function renderTabs() {
-
-    tabsDiv.innerHTML = "";
-
-    tabs.forEach((tab, index) => {
-
-        const div = document.createElement("div");
-        div.className = index === currentTab ? "tab active" : "tab";
-
-        const title = document.createElement("span");
-        title.innerText = "Tab " + (index + 1);
-
-        title.onclick = () => {
-            currentTab = index;
-            renderTabs();
-            loadTab();
-        };
-
-        const closeBtn = document.createElement("button");
-        closeBtn.innerText = "x";
-        closeBtn.className = "closeBtn";
-
-        closeBtn.onclick = (e) => {
-            e.stopPropagation();
-            closeTab(index);
-        };
-
-        div.appendChild(title);
-        div.appendChild(closeBtn);
-        tabsDiv.appendChild(div);
-    });
-}
-
-function loadTab() {
-    frame.src = tabs[currentTab];
-    urlInput.value = tabs[currentTab];
-}
-
-function goToUrl() {
-
-    let url = urlInput.value.trim();
-
-    if (!url.includes(".") && !url.startsWith("http")) {
-        url = "https://www.google.com/search?q=" + encodeURIComponent(url);
-    } else if (!url.startsWith("http")) {
-        url = "https://" + url;
-    }
-
-    tabs[currentTab] = url;
-    loadTab();
-}
+// load wallpaper
+(function(){
+    let w=localStorage.getItem("wallpaper");
+    if(w) applyWallpaper(w);
+})();
 
 // =========================
-// BOOKMARKS
+// INIT
 // =========================
 
-function addBookmark() {
-
-    let bookmarks = JSON.parse(localStorage.getItem("bookmarks")) || [];
-    bookmarks.push(tabs[currentTab]);
-
-    localStorage.setItem("bookmarks", JSON.stringify(bookmarks));
-
-    loadBookmarks();
-}
-
-function loadBookmarks() {
-
-    const list = document.getElementById("bookmarkList");
-    list.innerHTML = "";
-
-    let bookmarks = JSON.parse(localStorage.getItem("bookmarks")) || [];
-
-    bookmarks.forEach(url => {
-
-        const li = document.createElement("li");
-        li.innerText = url;
-
-        li.onclick = () => {
-            tabs[currentTab] = url;
-            loadTab();
-        };
-
-        list.appendChild(li);
-    });
-}
-
-// =========================
-// DOWNLOAD MANAGER
-// =========================
-
-function fakeDownload() {
-
-    const files = [
-        "cat.png",
-        "brain.ai",
-        "game.exe",
-        "notes.txt",
-        "quantum.zip"
-    ];
-
-    const file =
-        files[Math.floor(Math.random() * files.length)];
-
-    const list =
-        document.getElementById("downloadList");
-
-    const li = document.createElement("li");
-    li.innerText = file + " downloaded";
-
-    list.appendChild(li);
-}
-
-// =========================
-// FAKE AI
-// =========================
-
-const aiWords = [
-    "quantum","banana","neural","pickle","hyperdrive",
-    "galaxy","robot","cheese","entropy","waffle"
-];
-
-function randomAI() {
-
-    let text = "";
-    for (let i = 0; i < 15; i++) {
-        text += aiWords[Math.floor(Math.random()*aiWords.length)] + " ";
-    }
-
-    document.getElementById("aiOutput").innerText = text;
-}
-
-// =========================
-// THEMES
-// =========================
-
-function setTheme(theme) {
-    document.body.className = theme;
-    localStorage.setItem("theme", theme);
-}
-
-// =========================
-// BACKGROUND
-// =========================
-
-function setBackground() {
-
-    defaultBackground =
-        document.getElementById("bgInput").value;
-
-    localStorage.setItem("defaultBackground", defaultBackground);
-
-    applyBackground();
-}
-
-function applyBackground() {
-
-    document.body.style.background =
-        defaultBackground.startsWith("http")
-        ? `url(${defaultBackground}) center/cover no-repeat`
-        : defaultBackground;
-}
-
-// =========================
-// DRAG WINDOW
-// =========================
-
-const win = document.getElementById("browserWindow");
-const bar = document.getElementById("topbar");
-
-let dragging = false;
-let ox, oy;
-
-bar.addEventListener("mousedown", e => {
-    dragging = true;
-    ox = e.clientX - win.offsetLeft;
-    oy = e.clientY - win.offsetTop;
-});
-
-document.addEventListener("mousemove", e => {
-    if (!dragging) return;
-    win.style.left = (e.clientX - ox) + "px";
-    win.style.top = (e.clientY - oy) + "px";
-});
-
-document.addEventListener("mouseup", () => dragging = false);
-
-// =========================
-// STARTUP
-// =========================
-
-setTheme(localStorage.getItem("theme") || "theme-blue");
-applyBackground();
-
-newTab();
-loadBookmarks();
+renderFS();
