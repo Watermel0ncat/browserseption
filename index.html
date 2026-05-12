@@ -2,83 +2,109 @@
 <html lang="en">
 
 <head>
-
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Mini Browser</title>
-
+<title>MiniOS</title>
 <link rel="stylesheet" href="style.css">
-
 </head>
 
 <body class="theme-blue">
 
-<div id="browserWindow">
+<!-- BOOT SCREEN -->
+<div id="boot">
+    <h1>MiniOS Booting...</h1>
+    <p id="bootText">Loading system...</p>
+</div>
 
-    <!-- TOP BAR (DRAG HANDLE) -->
-    <div id="topbar">
+<!-- DESKTOP -->
+<div id="desktop">
 
-        <button onclick="newTab()">+</button>
+    <!-- ICONS -->
+    <div id="icons">
+        <div class="icon" onclick="openApp('browser')">🌐 Browser</div>
+        <div class="icon" onclick="openApp('files')">📁 Files</div>
+        <div class="icon" onclick="openApp('notes')">📝 Notes</div>
+        <div class="icon" onclick="openApp('ai')">🤖 AI</div>
+    </div>
 
-        <input id="urlInput" type="text" placeholder="Enter URL or search">
+    <!-- WALLPAPER CONTROLS -->
+    <div id="wallpaperPanel">
 
-        <button onclick="goToUrl()">Go</button>
+        <input id="wallpaperInput" placeholder="Color or image URL">
 
-        <button onclick="addBookmark()">★</button>
+        <input type="file" id="wallpaperFile" accept="image/*">
+
+        <button onclick="setWallpaper()">Apply Wallpaper</button>
 
     </div>
 
-    <!-- THEMES -->
-    <div id="themeBar">
+    <!-- WINDOWS -->
+    <div id="windows">
 
-        <button onclick="setTheme('theme-blue')">Blue</button>
-        <button onclick="setTheme('theme-purple')">Purple</button>
-        <button onclick="setTheme('theme-black')">Black</button>
-        <button onclick="setTheme('theme-white')">White</button>
+        <!-- BROWSER -->
+        <div class="window hidden" id="browserWindow">
+            <div class="titlebar" onmousedown="drag(event,'browserWindow')">
+                <span>Browser</span>
+                <button onclick="closeWindow('browserWindow')">x</button>
+            </div>
+
+            <input id="url" placeholder="url">
+            <button onclick="go()">Go</button>
+
+            <iframe id="frame"></iframe>
+        </div>
+
+        <!-- FILES -->
+        <div class="window hidden" id="filesWindow">
+            <div class="titlebar" onmousedown="drag(event,'filesWindow')">
+                <span>Files</span>
+                <button onclick="closeWindow('filesWindow')">x</button>
+            </div>
+
+            <button onclick="createFile()">New File</button>
+            <div id="fileList"></div>
+        </div>
+
+        <!-- NOTES -->
+        <div class="window hidden" id="notesWindow">
+            <div class="titlebar" onmousedown="drag(event,'notesWindow')">
+                <span>Notes</span>
+                <button onclick="closeWindow('notesWindow')">x</button>
+            </div>
+
+            <textarea id="noteArea"></textarea>
+            <button onclick="saveNote()">Save</button>
+        </div>
+
+        <!-- AI -->
+        <div class="window hidden" id="aiWindow">
+            <div class="titlebar" onmousedown="drag(event,'aiWindow')">
+                <span>AI</span>
+                <button onclick="closeWindow('aiWindow')">x</button>
+            </div>
+
+            <input id="aiInput">
+            <button onclick="askAI()">Ask</button>
+
+            <div id="aiOutput"></div>
+        </div>
 
     </div>
+</div>
 
-    <!-- BACKGROUND PICKER -->
-    <div id="bgBar">
+<!-- TASKBAR -->
+<div id="taskbar">
 
-        <input id="bgInput" type="text" placeholder="Background color or image URL">
+    <button onclick="toggleStart()">Start</button>
 
-        <button onclick="setBackground()">Set Background</button>
-
-    </div>
-
-    <!-- TABS -->
-    <div id="tabs"></div>
-
-    <!-- BROWSER -->
-    <iframe id="browserFrame"></iframe>
-
-    <!-- PANELS -->
-    <div id="panels">
-
-        <div class="panel">
-            <h3>Bookmarks</h3>
-            <ul id="bookmarkList"></ul>
-        </div>
-
-        <div class="panel">
-            <h3>Downloads</h3>
-            <button onclick="fakeDownload()">Download File</button>
-            <ul id="downloadList"></ul>
-        </div>
-
-        <div class="panel">
-            <h3>Fake AI</h3>
-            <button onclick="randomAI()">Generate</button>
-            <p id="aiOutput">AI ready...</p>
-        </div>
-
+    <div id="startMenu" class="hidden">
+        <div onclick="openApp('browser')">Browser</div>
+        <div onclick="openApp('files')">Files</div>
+        <div onclick="openApp('notes')">Notes</div>
+        <div onclick="openApp('ai')">AI</div>
     </div>
 
 </div>
 
 <script src="script.js"></script>
-
 </body>
 </html>
