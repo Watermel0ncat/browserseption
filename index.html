@@ -1,54 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>MiniOS Ultimate Stable</title>
+<title>MiniOS Safe Core</title>
 <link rel="stylesheet" href="style.css">
 <script defer src="script.js"></script>
 </head>
 
 <body>
 
-<!-- DESKTOP ROOT (REQUIRED) -->
-<div id="desktop"></div>
+<div id="desktop">
 
-<!-- TASKBAR -->
-<div id="taskbar">
-    <button onclick="openApp('browser')">Browser</button>
-    <button onclick="openApp('ai')">AI</button>
-    <div id="taskApps"></div>
-</div>
+    <button onclick="openBrowser()">Open Browser</button>
+    <button onclick="openAI()">Open AI</button>
 
-<!-- ===================== -->
-<!-- TEMPLATES (MUST EXIST) -->
-<!-- ===================== -->
+    <div id="windows"></div>
 
-<div id="browserTemplate" class="window hidden">
-    <div class="titlebar">
-        <span>Browser</span>
-        <div>
-            <button class="min">_</button>
-            <button class="close">x</button>
-        </div>
-    </div>
-
-    <input class="url" placeholder="https://example.com">
-    <button class="go">Go</button>
-    <iframe class="frame"></iframe>
-</div>
-
-<div id="aiTemplate" class="window hidden">
-    <div class="titlebar">
-        <span>AI</span>
-        <div>
-            <button class="min">_</button>
-            <button class="close">x</button>
-        </div>
-    </div>
-
-    <input class="aiInput" placeholder="Ask...">
-    <button class="ask">Ask</button>
-    <div class="aiOutput"></div>
 </div>
 
 </body>
