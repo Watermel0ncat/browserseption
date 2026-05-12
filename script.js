@@ -1,4 +1,189 @@
+// =========================
+// GLOBAL STATE
+// =========================
 
+window.OS = {
+    z: 10,
+    drag: { el:null, x:0, y:0 },
+    windows: {}
+};
+
+// =========================
+// WINDOW FACTORY (FIXED PROPERLY)
+// =========================
+
+function openApp(type) {
+
+    const template = document.getElementById(type + "Template");
+    if (!template) return;
+
+    const win = template.cloneNode(true);
+    win.classList.remove("hidden");
+
+    const id = type + "_" + Date.now();
+    win.id = id;
+
+    win.style.left = (100 + Math.random()*200) + "px";
+    win.style.top = (100 + Math.random()*200) + "px";
+
+    document.getElementById("desktop").appendChild(win);
+
+    OS.windows[id] = {
+        type,
+        element: win
+    };
+
+    bindWindow(win, type, id);
+    updateTaskbar();
+
+    bring(win);
+}
+
+// =========================
+// BIND EVENTS (CRITICAL FIX)
+// =========================
+
+function bindWindow(win, type, id) {
+
+    const title = win.querySelector(".titlebar");
+    title.onmousedown = (e) => dragStart(e, id);
+
+    const close = win.querySelector(".close");
+    const min = win.querySelector(".min");
+
+    // CLOSE
+    close.onclick = () => {
+        win.remove();
+        delete OS.windows[id];
+        updateTaskbar();
+    };
+
+    // MINIMIZE
+    min.onclick = () => {
+        win.style.display = "none";
+        updateTaskbar();
+    };
+
+    // ================= BROWSER =================
+    if (type === "browser") {
+
+        const go = win.querySelector(".go");
+        const url = win.querySelector(".url");
+        const frame = win.querySelector(".frame");
+
+        go.onclick = () => {
+            let u = url.value;
+            if (!u.startsWith("http")) u = "https://" + u;
+            frame.src = u;
+        };
+    }
+
+    // ================= AI =================
+    if (type === "ai") {
+
+        const input = win.querySelector(".aiInput");
+        const out = win.querySelector(".aiOutput");
+
+        win.querySelector(".ask").onclick = () => {
+
+            let q = input.value.toLowerCase();
+
+            // Try reading browser context safely
+            let pageText = "";
+
+            for (let k in OS.windows) {
+                let w = OS.windows[k].element;
+                let frame = w.querySelector?.("iframe");
+
+                try {
+                    if (frame?.contentDocument) {
+                        pageText = frame.contentDocument.body.innerText;
+                        break;
+                    }
+                } catch {}
+            }
+
+            let response = "";
+
+            if (q.includes("page")) {
+                response = pageText
+                    ? pageText.slice(0,300)
+                    : "No readable page content.";
+            }
+
+            else if (q.includes("hello")) {
+                response = "Hello, I am MiniOS AI.";
+            }
+
+            else if (q.includes("windows")) {
+                response = "Open windows: " + Object.keys(OS.windows).length;
+            }
+
+            else {
+                response = "AI: " + q.split(" ").reverse().join(" ");
+            }
+
+            out.innerText = response;
+        };
+    }
+}
+
+// =========================
+// DRAG SYSTEM (FIXED)
+// =========================
+
+function dragStart(e, id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    OS.drag.el = el;
+    OS.drag.x = e.clientX - el.offsetLeft;
+    OS.drag.y = e.clientY - el.offsetTop;
+}
+
+document.addEventListener("mousemove", e => {
+    if (!OS.drag.el) return;
+
+    OS.drag.el.style.left = (e.clientX - OS.drag.x) + "px";
+    OS.drag.el.style.top = (e.clientY - OS.drag.y) + "px";
+});
+
+document.addEventListener("mouseup", () => {
+    OS.drag.el = null;
+});
+
+// =========================
+// TASKBAR (NOW WORKS)
+// =========================
+
+function updateTaskbar() {
+
+    const bar = document.getElementById("taskApps");
+    bar.innerHTML = "";
+
+    for (let id in OS.windows) {
+
+        const w = OS.windows[id].element;
+
+        const btn = document.createElement("button");
+        btn.innerText = id;
+
+        btn.onclick = () => {
+            w.style.display = "block";
+            bring(w);
+        };
+
+        bar.appendChild(btn);
+    }
+}
+
+// =========================
+// Z INDEX
+// =========================
+
+function bring(el) {
+    el.style.zIndex = ++OS.z;
+}
 // =========================
 // GLOBAL STATE (SAFE)
 // =========================
