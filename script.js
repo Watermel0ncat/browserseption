@@ -1,4 +1,82 @@
-// =========================
+body {
+    margin:0;
+    font-family:Segoe UI, Arial;
+    overflow:hidden;
+}
+
+#desktop {
+    width:100vw;
+    height:100vh;
+    background:#1e293b;
+}
+
+/* WINDOW */
+.window {
+    position:absolute;
+    width:600px;
+    height:400px;
+    background:#111827;
+    color:white;
+    border-radius:8px;
+    overflow:hidden;
+    box-shadow:0 10px 30px rgba(0,0,0,0.4);
+}
+
+.titlebar {
+    background:#0f172a;
+    padding:6px;
+    display:flex;
+    justify-content:space-between;
+    cursor:move;
+}
+
+/* TASKBAR */
+#taskbar {
+    position:fixed;
+    bottom:0;
+    width:100%;
+    height:45px;
+    background:#0b1220;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding-left:10px;
+}
+
+.taskBtn {
+    background:#1f2937;
+    color:white;
+    border:none;
+    padding:5px 10px;
+    cursor:pointer;
+}
+
+/* BROWSER UI */
+.tabbar {
+    display:flex;
+    gap:5px;
+    background:#1f2937;
+    padding:5px;
+}
+
+.tab {
+    padding:4px 8px;
+    background:#374151;
+    cursor:pointer;
+    border-radius:4px;
+    font-size:12px;
+}
+
+.tab.active {
+    background:#60a5fa;
+    color:black;
+}
+
+.content iframe {
+    width:100%;
+    height:300px;
+    border:none;
+}// =========================
 // CORE OS STATE
 // =========================
 
