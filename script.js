@@ -1,4 +1,166 @@
 // =========================
+// SAFE STATE
+// =========================
+
+window.OS = {
+    z: 10,
+    drag: { el:null, x:0, y:0 }
+};
+
+// =========================
+// BOOT SAFE INIT (CRITICAL FIX)
+// =========================
+
+window.addEventListener("DOMContentLoaded", () => {
+    console.log("MiniOS loaded");
+});
+
+// =========================
+// WINDOW FACTORY (STABLE)
+// =========================
+
+function openApp(type) {
+
+    const template = document.getElementById(type + "Template");
+    if (!template) {
+        console.error("Missing template:", type);
+        return;
+    }
+
+    const win = template.cloneNode(true);
+    win.classList.remove("hidden");
+
+    const id = type + "_" + Date.now();
+    win.id = id;
+
+    win.style.left = "100px";
+    win.style.top = "100px";
+
+    document.getElementById("desktop").appendChild(win);
+
+    bindWindow(win, type);
+
+    bring(win);
+    updateTaskbar();
+}
+
+// =========================
+// BIND EVENTS (FIXED RELIABLY)
+// =========================
+
+function bindWindow(win, type) {
+
+    const title = win.querySelector(".titlebar");
+    title.onmousedown = (e) => dragStart(e, win.id);
+
+    const close = win.querySelector(".close");
+    const min = win.querySelector(".min");
+
+    // CLOSE
+    close.onclick = () => {
+        win.remove();
+        updateTaskbar();
+    };
+
+    // MINIMIZE
+    min.onclick = () => {
+        win.style.display = "none";
+        updateTaskbar();
+    };
+
+    // ================= BROWSER =================
+    if (type === "browser") {
+
+        const go = win.querySelector(".go");
+        const url = win.querySelector(".url");
+        const frame = win.querySelector(".frame");
+
+        go.onclick = () => {
+            let u = url.value;
+            if (!u.startsWith("http")) u = "https://" + u;
+            frame.src = u;
+        };
+    }
+
+    // ================= AI =================
+    if (type === "ai") {
+
+        const input = win.querySelector(".aiInput");
+        const out = win.querySelector(".aiOutput");
+
+        win.querySelector(".ask").onclick = () => {
+
+            let q = input.value.toLowerCase();
+
+            let response = "";
+
+            if (q.includes("hello")) response = "Hello.";
+            else if (q.includes("reverse")) response = q.split(" ").reverse().join(" ");
+            else response = "AI: " + q;
+
+            out.innerText = response;
+        };
+    }
+}
+
+// =========================
+// DRAG SYSTEM (SAFE)
+// =========================
+
+function dragStart(e, id) {
+
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    OS.drag.el = el;
+    OS.drag.x = e.clientX - el.offsetLeft;
+    OS.drag.y = e.clientY - el.offsetTop;
+}
+
+document.addEventListener("mousemove", e => {
+
+    if (!OS.drag.el) return;
+
+    OS.drag.el.style.left = (e.clientX - OS.drag.x) + "px";
+    OS.drag.el.style.top = (e.clientY - OS.drag.y) + "px";
+});
+
+document.addEventListener("mouseup", () => {
+    OS.drag.el = null;
+});
+
+// =========================
+// TASKBAR
+// =========================
+
+function updateTaskbar() {
+
+    const bar = document.getElementById("taskApps");
+    bar.innerHTML = "";
+
+    document.querySelectorAll(".window").forEach(w => {
+
+        if (w.style.display === "none") return;
+
+        const b = document.createElement("button");
+        b.innerText = w.id;
+
+        b.onclick = () => {
+            w.style.display = "block";
+            bring(w);
+        };
+
+        bar.appendChild(b);
+    });
+}
+
+// =========================
+// Z INDEX
+// =========================
+
+function bring(el) {
+    el.style.zIndex = ++OS.z;
+}// =========================
 // GLOBAL STATE
 // =========================
 
