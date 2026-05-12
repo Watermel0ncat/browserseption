@@ -1,4 +1,243 @@
 // =========================
+// GLOBAL SAFE OS STATE
+// =========================
+
+window.OS = {
+    fs: JSON.parse(localStorage.getItem("fs") || "[]"),
+    aiMemory: JSON.parse(localStorage.getItem("aiMemory") || "[]"),
+    currentFile: null,
+    drag: { el: null, x:0, y:0 },
+    z: 10
+};
+
+// =========================
+// BOOT (FAILSAFE)
+// =========================
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const boot = document.getElementById("boot");
+    const text = document.getElementById("bootText");
+
+    const steps = [
+        "Loading kernel...",
+        "Mounting filesystem...",
+        "Starting UI...",
+        "Launching desktop..."
+    ];
+
+    let i = 0;
+
+    let t = setInterval(() => {
+        text.innerText = steps[i++] || "Starting...";
+        if (i >= steps.length) {
+            clearInterval(t);
+            setTimeout(() => boot.style.display = "none", 300);
+        }
+    }, 400);
+
+    // HARD FAILSAFE
+    setTimeout(() => {
+        if (boot) boot.style.display = "none";
+    }, 5000);
+});
+
+// =========================
+// WINDOW SYSTEM
+// =========================
+
+function openApp(id) {
+    const w = document.getElementById(id + "Window");
+    if (!w) return;
+
+    w.classList.remove("hidden");
+    bring(w);
+    updateTaskbar();
+}
+
+function closeWindow(id) {
+    const w = document.getElementById(id);
+    if (w) w.classList.add("hidden");
+    updateTaskbar();
+}
+
+function minimize(id) {
+    const w = document.getElementById(id);
+    if (w) w.classList.add("hidden");
+    updateTaskbar();
+}
+
+function bring(el) {
+    el.style.zIndex = ++OS.z;
+}
+
+// =========================
+// DRAG SYSTEM (NO LET COLLISIONS)
+// =========================
+
+function dragStart(e, id) {
+    OS.drag.el = document.getElementById(id);
+    OS.drag.x = e.clientX - OS.drag.el.offsetLeft;
+    OS.drag.y = e.clientY - OS.drag.el.offsetTop;
+}
+
+document.addEventListener("mousemove", e => {
+    if (!OS.drag.el) return;
+
+    OS.drag.el.style.left = (e.clientX - OS.drag.x) + "px";
+    OS.drag.el.style.top = (e.clientY - OS.drag.y) + "px";
+});
+
+document.addEventListener("mouseup", () => OS.drag.el = null);
+
+// =========================
+// TASKBAR
+// =========================
+
+function updateTaskbar() {
+    const bar = document.getElementById("taskApps");
+    bar.innerHTML = "";
+
+    ["browser","files","notes","ai"].forEach(app => {
+        const w = document.getElementById(app + "Window");
+        if (!w || w.classList.contains("hidden")) return;
+
+        let b = document.createElement("button");
+        b.innerText = app;
+        b.onclick = () => openApp(app);
+        bar.appendChild(b);
+    });
+}
+
+// =========================
+// FILE SYSTEM
+// =========================
+
+function createFile() {
+    let name = prompt("File name");
+    if (!name) return;
+
+    OS.fs.push({ type:"file", name, content:"" });
+    saveFS(); renderFS();
+}
+
+function createFolder() {
+    let name = prompt("Folder name");
+    if (!name) return;
+
+    OS.fs.push({ type:"folder", name, children:[] });
+    saveFS(); renderFS();
+}
+
+function renderFS() {
+    const list = document.getElementById("fileList");
+    list.innerHTML = "";
+
+    OS.fs.forEach((f,i) => {
+        let d = document.createElement("div");
+        d.innerText = f.type === "folder" ? "📁 " + f.name : "📄 " + f.name;
+
+        d.onclick = () => {
+            if (f.type === "file") {
+                OS.currentFile = i;
+                document.getElementById("noteArea").value = f.content;
+            }
+        };
+
+        list.appendChild(d);
+    });
+}
+
+function saveFS() {
+    localStorage.setItem("fs", JSON.stringify(OS.fs));
+}
+
+// =========================
+// NOTES
+// =========================
+
+function saveNote() {
+    if (OS.currentFile === null) return;
+
+    OS.fs[OS.currentFile].content =
+        document.getElementById("noteArea").value;
+
+    saveFS(); renderFS();
+}
+
+// =========================
+// AI
+// =========================
+
+function askAI() {
+    let q = document.getElementById("aiInput").value;
+
+    OS.aiMemory.push(q);
+    if (OS.aiMemory.length > 10) OS.aiMemory.shift();
+
+    localStorage.setItem("aiMemory", JSON.stringify(OS.aiMemory));
+
+    document.getElementById("aiOutput").innerText =
+        "Memory: " + OS.aiMemory.slice(-3).join(" | ");
+}
+
+// =========================
+// WALLPAPER
+// =========================
+
+function setWallpaper() {
+    let file = document.getElementById("wallpaperFile").files[0];
+    let val = document.getElementById("wallpaperInput").value;
+
+    if (file) {
+        let r = new FileReader();
+        r.onload = e => applyWallpaper(e.target.result);
+        r.readAsDataURL(file);
+        return;
+    }
+
+    applyWallpaper(val);
+}
+
+function applyWallpaper(val) {
+    if (!val) return;
+
+    const d = document.getElementById("desktop");
+
+    if (val.startsWith("http") || val.startsWith("data:")) {
+        d.style.background = `url(${val}) center/cover`;
+    } else {
+        d.style.background = val;
+    }
+
+    localStorage.setItem("wallpaper", val);
+}
+
+// =========================
+// CONTEXT MENU
+// =========================
+
+document.addEventListener("contextmenu", e => {
+    e.preventDefault();
+
+    const m = document.getElementById("contextMenu");
+    m.style.left = e.pageX + "px";
+    m.style.top = e.pageY + "px";
+    m.classList.remove("hidden");
+});
+
+document.addEventListener("click", () => {
+    document.getElementById("contextMenu").classList.add("hidden");
+});
+
+// =========================
+// INIT
+// =========================
+
+window.onload = () => {
+    renderFS();
+    updateTaskbar();
+};// =========================
 // GLOBAL OS STATE (NO REDECLARATION BUGS)
 // =========================
 
