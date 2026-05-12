@@ -1,4 +1,207 @@
-let fs = JSON.parse(localStorage.getItem("fs") || "[]");
+// =========================
+// GLOBAL OS STATE (NO REDECLARATION BUGS)
+// =========================
+
+window.OS = {
+    fs: JSON.parse(localStorage.getItem("fs") || "[]"),
+    aiMemory: JSON.parse(localStorage.getItem("aiMemory") || "[]"),
+    currentFile: null,
+    z: 10
+};
+
+// =========================
+// BOOT SYSTEM (SAFE)
+// =========================
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const boot = document.getElementById("boot");
+    const text = document.getElementById("bootText");
+
+    const steps = [
+        "Loading kernel...",
+        "Mounting filesystem...",
+        "Starting UI...",
+        "Launching desktop..."
+    ];
+
+    let i = 0;
+
+    let t = setInterval(() => {
+
+        text.innerText = steps[i++] || "Starting...";
+
+        if (i >= steps.length) {
+            clearInterval(t);
+
+            setTimeout(() => {
+                boot.style.display = "none";
+            }, 400);
+        }
+
+    }, 400);
+
+    // FAILSAFE
+    setTimeout(() => {
+        boot.style.display = "none";
+    }, 5000);
+});
+
+// =========================
+// WINDOW SYSTEM
+// =========================
+
+let dragTarget = null;
+let ox = 0, oy = 0;
+
+function openApp(id) {
+    const w = document.getElementById(id + "Window");
+    if (!w) return;
+
+    w.classList.remove("hidden");
+    bring(w);
+    updateTaskbar();
+}
+
+function closeWindow(id) {
+    const w = document.getElementById(id);
+    if (!w) return;
+
+    w.classList.add("hidden");
+    updateTaskbar();
+}
+
+function minimize(id) {
+    const w = document.getElementById(id);
+    if (w) w.classList.add("hidden");
+    updateTaskbar();
+}
+
+function bring(el) {
+    el.style.zIndex = ++OS.z;
+}
+
+// =========================
+// DRAG
+// =========================
+
+function drag(e, id) {
+    dragTarget = document.getElementById(id);
+    ox = e.clientX - dragTarget.offsetLeft;
+    oy = e.clientY - dragTarget.offsetTop;
+}
+
+document.addEventListener("mousemove", e => {
+    if (!dragTarget) return;
+    dragTarget.style.left = (e.clientX - ox) + "px";
+    dragTarget.style.top = (e.clientY - oy) + "px";
+});
+
+document.addEventListener("mouseup", () => dragTarget = null);
+
+// =========================
+// TASKBAR
+// =========================
+
+function updateTaskbar() {
+    const bar = document.getElementById("taskApps");
+    bar.innerHTML = "";
+
+    ["browser","files","notes","ai"].forEach(a => {
+        const w = document.getElementById(a + "Window");
+        if (!w || w.classList.contains("hidden")) return;
+
+        let b = document.createElement("button");
+        b.innerText = a;
+        b.onclick = () => openApp(a);
+        bar.appendChild(b);
+    });
+}
+
+// =========================
+// FILE SYSTEM
+// =========================
+
+function createFile() {
+    let name = prompt("File name");
+    if (!name) return;
+
+    OS.fs.push({ type:"file", name, content:"" });
+    saveFS();
+    renderFS();
+}
+
+function createFolder() {
+    let name = prompt("Folder name");
+    if (!name) return;
+
+    OS.fs.push({ type:"folder", name, children:[] });
+    saveFS();
+    renderFS();
+}
+
+function renderFS() {
+    const list = document.getElementById("fileList");
+    list.innerHTML = "";
+
+    OS.fs.forEach((f,i) => {
+        let d = document.createElement("div");
+        d.innerText = f.type === "folder" ? "📁 " + f.name : "📄 " + f.name;
+
+        d.onclick = () => {
+            if (f.type === "file") {
+                OS.currentFile = i;
+                document.getElementById("noteArea").value = f.content;
+            }
+        };
+
+        list.appendChild(d);
+    });
+}
+
+function saveFS() {
+    localStorage.setItem("fs", JSON.stringify(OS.fs));
+}
+
+// =========================
+// NOTES
+// =========================
+
+function saveNote() {
+    if (OS.currentFile === null) return;
+
+    OS.fs[OS.currentFile].content =
+        document.getElementById("noteArea").value;
+
+    saveFS();
+    renderFS();
+}
+
+// =========================
+// AI (MEMORY)
+// =========================
+
+function askAI() {
+    let q = document.getElementById("aiInput").value;
+
+    OS.aiMemory.push(q);
+    if (OS.aiMemory.length > 10) OS.aiMemory.shift();
+
+    localStorage.setItem("aiMemory", JSON.stringify(OS.aiMemory));
+
+    let r = "Memory: " + (OS.aiMemory.slice(-3).join(" | "));
+
+    document.getElementById("aiOutput").innerText = r;
+}
+
+// =========================
+// TASKBAR INIT
+// =========================
+
+window.onload = () => {
+    renderFS();
+    updateTaskbar();
+};let fs = JSON.parse(localStorage.getItem("fs") || "[]");
 let aiMemory = JSON.parse(localStorage.getItem("aiMemory") || "[]");
 
 let currentFile = null;
