@@ -11,6 +11,7 @@
 
 <div id="desktop">
 
+    <!-- ICONS -->
     <div id="icons">
         <div onclick="openApp('browser')">🌐 Browser</div>
         <div onclick="openApp('files')">📁 Files</div>
@@ -18,25 +19,29 @@
         <div onclick="openApp('ai')">🤖 AI</div>
     </div>
 
+    <!-- WALLPAPER -->
     <div id="wallpaperPanel">
         <input id="wallpaperInput" placeholder="Color or URL">
         <input type="file" id="wallpaperFile">
         <button onclick="setWallpaper()">Apply</button>
     </div>
 
-    <!-- WINDOWS -->
-
+    <!-- BROWSER -->
     <div class="window hidden" id="browserWindow">
         <div class="titlebar" onmousedown="dragStart(event,'browserWindow')">
             <span>Browser</span>
-            <button onclick="minimize('browserWindow')">_</button>
-            <button onclick="closeWindow('browserWindow')">x</button>
+            <div>
+                <button onclick="minimize('browserWindow')">_</button>
+                <button onclick="closeWindow('browserWindow')">x</button>
+            </div>
         </div>
-        <input id="url">
+
+        <input id="url" placeholder="Enter URL">
         <button onclick="go()">Go</button>
         <iframe id="frame"></iframe>
     </div>
 
+    <!-- FILES -->
     <div class="window hidden" id="filesWindow">
         <div class="titlebar" onmousedown="dragStart(event,'filesWindow')">
             <span>Files</span>
@@ -49,6 +54,7 @@
         <div id="fileList"></div>
     </div>
 
+    <!-- NOTES -->
     <div class="window hidden" id="notesWindow">
         <div class="titlebar" onmousedown="dragStart(event,'notesWindow')">
             <span>Notes</span>
@@ -59,28 +65,27 @@
         <button onclick="saveNote()">Save</button>
     </div>
 
+    <!-- AI -->
     <div class="window hidden" id="aiWindow">
         <div class="titlebar" onmousedown="dragStart(event,'aiWindow')">
             <span>AI</span>
             <button onclick="closeWindow('aiWindow')">x</button>
         </div>
 
-        <input id="aiInput">
+        <input id="aiInput" placeholder="Ask something...">
         <button onclick="askAI()">Ask</button>
         <div id="aiOutput"></div>
     </div>
 
 </div>
 
+<!-- TASKBAR -->
 <div id="taskbar">
-    <button onclick="toggleStart()">Start</button>
+    <button onclick="openApp('browser')">Browser</button>
+    <button onclick="openApp('files')">Files</button>
+    <button onclick="openApp('notes')">Notes</button>
+    <button onclick="openApp('ai')">AI</button>
     <div id="taskApps"></div>
-</div>
-
-<div id="contextMenu" class="hidden">
-    <div onclick="setWallpaperPrompt()">Wallpaper</div>
-    <div onclick="createFolder()">New Folder</div>
-    <div onclick="refreshDesktop()">Refresh</div>
 </div>
 
 </body>
