@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>MiniOS Stable</title>
+<title>MiniOS Ultimate</title>
 <link rel="stylesheet" href="style.css">
 </head>
 
@@ -11,7 +11,7 @@
 <!-- BOOT -->
 <div id="boot">
     <h1>MiniOS Booting...</h1>
-    <p id="bootText">Loading...</p>
+    <p id="bootText">Initializing kernel...</p>
 </div>
 
 <!-- DESKTOP -->
@@ -33,55 +33,63 @@
     </div>
 
     <!-- WINDOWS -->
-    <div id="windows">
 
-        <div class="window hidden" id="browserWindow">
-            <div class="titlebar" onmousedown="drag(event,'browserWindow')">
-                <span>Browser</span>
+    <div class="window hidden" id="browserWindow">
+        <div class="titlebar" onmousedown="drag(event,'browserWindow')">
+            <span>Browser</span>
+            <div>
+                <button onclick="minimize('browserWindow')">_</button>
                 <button onclick="closeWindow('browserWindow')">x</button>
             </div>
-            <input id="url">
-            <button onclick="go()">Go</button>
-            <iframe id="frame"></iframe>
         </div>
 
-        <div class="window hidden" id="filesWindow">
-            <div class="titlebar" onmousedown="drag(event,'filesWindow')">
-                <span>Files</span>
+        <input id="url">
+        <button onclick="go()">Go</button>
+        <iframe id="frame"></iframe>
+    </div>
+
+    <div class="window hidden" id="filesWindow">
+        <div class="titlebar" onmousedown="drag(event,'filesWindow')">
+            <span>Files</span>
+            <div>
+                <button onclick="createFolder()">+F</button>
+                <button onclick="createFile()">+Fle</button>
                 <button onclick="closeWindow('filesWindow')">x</button>
             </div>
-
-            <button onclick="createFile()">New File</button>
-            <div id="fileList"></div>
         </div>
 
-        <div class="window hidden" id="notesWindow">
-            <div class="titlebar" onmousedown="drag(event,'notesWindow')">
-                <span>Notes</span>
-                <button onclick="closeWindow('notesWindow')">x</button>
-            </div>
-
-            <textarea id="noteArea"></textarea>
-            <button onclick="saveNote()">Save</button>
-        </div>
-
-        <div class="window hidden" id="aiWindow">
-            <div class="titlebar" onmousedown="drag(event,'aiWindow')">
-                <span>AI</span>
-                <button onclick="closeWindow('aiWindow')">x</button>
-            </div>
-
-            <input id="aiInput">
-            <button onclick="askAI()">Ask</button>
-            <div id="aiOutput"></div>
-        </div>
-
+        <div id="fileList"></div>
     </div>
+
+    <div class="window hidden" id="notesWindow">
+        <div class="titlebar" onmousedown="drag(event,'notesWindow')">
+            <span>Notes</span>
+            <button onclick="closeWindow('notesWindow')">x</button>
+        </div>
+
+        <textarea id="noteArea"></textarea>
+        <button onclick="saveNote()">Save</button>
+    </div>
+
+    <div class="window hidden" id="aiWindow">
+        <div class="titlebar" onmousedown="drag(event,'aiWindow')">
+            <span>AI</span>
+            <button onclick="closeWindow('aiWindow')">x</button>
+        </div>
+
+        <input id="aiInput">
+        <button onclick="askAI()">Ask</button>
+        <div id="aiOutput"></div>
+    </div>
+
 </div>
 
 <!-- TASKBAR -->
 <div id="taskbar">
+
     <button onclick="toggleStart()">Start</button>
+
+    <div id="taskApps"></div>
 
     <div id="startMenu" class="hidden">
         <div onclick="openApp('browser')">Browser</div>
@@ -89,6 +97,14 @@
         <div onclick="openApp('notes')">Notes</div>
         <div onclick="openApp('ai')">AI</div>
     </div>
+
+</div>
+
+<!-- RIGHT CLICK MENU -->
+<div id="contextMenu" class="hidden">
+    <div onclick="setWallpaperPrompt()">Wallpaper</div>
+    <div onclick="createFolder()">New Folder</div>
+    <div onclick="refreshDesktop()">Refresh</div>
 </div>
 
 <script src="script.js"></script>
