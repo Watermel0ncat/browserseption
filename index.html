@@ -9,78 +9,31 @@
 
 <body>
 
-<div id="desktop">
+<div id="desktop"></div>
 
-    <!-- ICONS -->
-    <div id="icons">
-        <div onclick="openApp('browser')">🌐 Browser</div>
-        <div onclick="openApp('files')">📁 Files</div>
-        <div onclick="openApp('notes')">📝 Notes</div>
-        <div onclick="openApp('ai')">🤖 AI</div>
-    </div>
-
-    <!-- WALLPAPER -->
-    <div id="wallpaperPanel">
-        <input id="wallpaperInput" placeholder="Color or URL">
-        <input type="file" id="wallpaperFile">
-        <button onclick="setWallpaper()">Apply</button>
-    </div>
-
-</div>
-
-<!-- TASKBAR -->
 <div id="taskbar">
     <div id="taskApps"></div>
 </div>
 
-<!-- ================= TEMPLATES ================= -->
+<!-- TEMPLATES -->
 
-<!-- BROWSER -->
 <div class="window hidden template" id="browserTemplate">
     <div class="titlebar">
         <span>Browser</span>
-        <div>
-            <button class="min">_</button>
-            <button class="close">x</button>
-        </div>
+        <button class="min">_</button>
+        <button class="close">x</button>
     </div>
-
-    <input class="url" placeholder="https://example.com">
+    <input class="url">
     <button class="go">Go</button>
     <iframe class="frame"></iframe>
 </div>
 
-<!-- FILES -->
-<div class="window hidden template" id="filesTemplate">
-    <div class="titlebar">
-        <span>Files</span>
-        <button class="close">x</button>
-    </div>
-
-    <button class="newFile">File</button>
-    <button class="newFolder">Folder</button>
-
-    <div class="fileList"></div>
-</div>
-
-<!-- NOTES -->
-<div class="window hidden template" id="notesTemplate">
-    <div class="titlebar">
-        <span>Notes</span>
-        <button class="close">x</button>
-    </div>
-
-    <textarea class="note"></textarea>
-    <button class="save">Save</button>
-</div>
-
-<!-- AI -->
 <div class="window hidden template" id="aiTemplate">
     <div class="titlebar">
         <span>AI</span>
+        <button class="min">_</button>
         <button class="close">x</button>
     </div>
-
     <input class="aiInput">
     <button class="ask">Ask</button>
     <div class="aiOutput"></div>
