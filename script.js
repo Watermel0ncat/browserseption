@@ -1,4 +1,81 @@
+console.log("MiniOS script loaded");
+
 // =========================
+// CORE WINDOW SYSTEM
+// =========================
+
+let z = 1;
+
+function createWindow(title, contentHTML) {
+
+    const win = document.createElement("div");
+    win.className = "window";
+
+    win.style.left = "100px";
+    win.style.top = "100px";
+    win.style.zIndex = ++z;
+
+    win.innerHTML = `
+        <div style="display:flex;justify-content:space-between;cursor:move;">
+            <span>${title}</span>
+            <button onclick="this.parentElement.parentElement.remove()">X</button>
+        </div>
+        <div>${contentHTML}</div>
+    `;
+
+    // drag support
+    let offsetX = 0;
+    let offsetY = 0;
+    let dragging = false;
+
+    win.querySelector("div").onmousedown = (e) => {
+        dragging = true;
+        offsetX = e.clientX - win.offsetLeft;
+        offsetY = e.clientY - win.offsetTop;
+    };
+
+    document.onmousemove = (e) => {
+        if (!dragging) return;
+        win.style.left = (e.clientX - offsetX) + "px";
+        win.style.top = (e.clientY - offsetY) + "px";
+    };
+
+    document.onmouseup = () => {
+        dragging = false;
+    };
+
+    document.getElementById("windows").appendChild(win);
+}
+
+// =========================
+// APPS
+// =========================
+
+function openBrowser() {
+
+    createWindow("Browser", `
+        <input id="url" placeholder="https://example.com">
+        <button onclick="
+            let u = document.getElementById('url').value;
+            if (!u.startsWith('http')) u = 'https://' + u;
+            window.open(u, '_blank');
+        ">Go</button>
+    `);
+}
+
+function openAI() {
+
+    createWindow("AI", `
+        <input id="aiInput" placeholder="Ask something">
+        <button onclick="
+            let q = document.getElementById('aiInput').value;
+            document.getElementById('aiOut').innerText =
+            'AI: ' + q.split(' ').reverse().join(' ');
+        ">Ask</button>
+
+        <div id="aiOut"></div>
+    `);
+}// =========================
 // SAFE STATE
 // =========================
 
