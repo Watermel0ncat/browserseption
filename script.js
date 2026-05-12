@@ -1,4 +1,276 @@
+// =========================
+// STATE
+// =========================
+
 let fs = JSON.parse(localStorage.getItem("fs") || "[]");
+let aiMemory = JSON.parse(localStorage.getItem("aiMemory") || "[]");
+
+let currentFile = null;
+let z = 10;
+
+let dragTarget = null;
+let ox = 0;
+let oy = 0;
+
+// =========================
+// BOOT (FIXED)
+// =========================
+
+function boot() {
+
+    setTimeout(() => {
+        document.getElementById("bootText").innerText = "Loading filesystem...";
+    }, 600);
+
+    setTimeout(() => {
+        document.getElementById("bootText").innerText = "Starting desktop...";
+    }, 1200);
+
+    setTimeout(() => {
+        document.getElementById("boot").style.display = "none";
+    }, 2000);
+}
+
+// =========================
+// WINDOW SYSTEM
+// =========================
+
+function openApp(id) {
+    const w = document.getElementById(id + "Window");
+    if (!w) return;
+
+    w.classList.remove("hidden");
+    bring(w);
+    updateTaskbar();
+}
+
+function closeWindow(id) {
+    const w = document.getElementById(id);
+    if (!w) return;
+
+    w.classList.add("hidden");
+    updateTaskbar();
+}
+
+function minimize(id) {
+    const w = document.getElementById(id);
+    if (!w) return;
+
+    w.classList.add("hidden");
+    updateTaskbar();
+}
+
+function bring(el) {
+    el.style.zIndex = ++z;
+}
+
+// =========================
+// DRAG
+// =========================
+
+function drag(e, id) {
+    dragTarget = document.getElementById(id);
+    if (!dragTarget) return;
+
+    ox = e.clientX - dragTarget.offsetLeft;
+    oy = e.clientY - dragTarget.offsetTop;
+}
+
+document.addEventListener("mousemove", e => {
+    if (!dragTarget) return;
+    dragTarget.style.left = (e.clientX - ox) + "px";
+    dragTarget.style.top = (e.clientY - oy) + "px";
+});
+
+document.addEventListener("mouseup", () => dragTarget = null);
+
+// =========================
+// TASKBAR
+// =========================
+
+function updateTaskbar() {
+    const bar = document.getElementById("taskApps");
+    if (!bar) return;
+
+    bar.innerHTML = "";
+
+    ["browser","files","notes","ai"].forEach(app => {
+        const w = document.getElementById(app + "Window");
+        if (!w || w.classList.contains("hidden")) return;
+
+        let b = document.createElement("button");
+        b.innerText = app;
+        b.onclick = () => openApp(app);
+
+        bar.appendChild(b);
+    });
+}
+
+// =========================
+// BROWSER
+// =========================
+
+function go() {
+    let u = document.getElementById("url").value;
+    if (!u) return;
+
+    if (!u.startsWith("http")) u = "https://" + u;
+
+    document.getElementById("frame").src = u;
+}
+
+// =========================
+// FILE SYSTEM (NESTED BASIC)
+// =========================
+
+function createFolder() {
+    let name = prompt("Folder name");
+    if (!name) return;
+
+    fs.push({ type: "folder", name, children: [] });
+    saveFS();
+    renderFS();
+}
+
+function createFile() {
+    let name = prompt("File name");
+    if (!name) return;
+
+    fs.push({ type: "file", name, content: "" });
+    saveFS();
+    renderFS();
+}
+
+function renderFS() {
+    const list = document.getElementById("fileList");
+    if (!list) return;
+
+    list.innerHTML = "";
+
+    fs.forEach((f,i) => {
+        let d = document.createElement("div");
+        d.innerText = f.type === "folder" ? "📁 " + f.name : "📄 " + f.name;
+
+        d.onclick = () => {
+            if (f.type === "file") {
+                currentFile = i;
+                document.getElementById("noteArea").value = f.content;
+            }
+        };
+
+        list.appendChild(d);
+    });
+}
+
+function saveFS() {
+    localStorage.setItem("fs", JSON.stringify(fs));
+}
+
+// =========================
+// NOTES
+// =========================
+
+function saveNote() {
+    if (currentFile === null) return;
+
+    fs[currentFile].content =
+        document.getElementById("noteArea").value;
+
+    saveFS();
+    renderFS();
+}
+
+// =========================
+// AI (WITH MEMORY)
+// =========================
+
+function askAI() {
+
+    let q = document.getElementById("aiInput").value;
+    aiMemory.push(q);
+
+    if (aiMemory.length > 10) aiMemory.shift();
+
+    localStorage.setItem("aiMemory", JSON.stringify(aiMemory));
+
+    let r;
+
+    if (q.includes("remember")) {
+        r = "Memory: " + aiMemory.slice(-5).join(" | ");
+    }
+    else if (q.includes("hello")) {
+        r = "Hello user.";
+    }
+    else {
+        r = "Processed: " + (aiMemory[aiMemory.length-2] || "none");
+    }
+
+    document.getElementById("aiOutput").innerText = r;
+}
+
+// =========================
+// WALLPAPER
+// =========================
+
+function setWallpaper() {
+
+    let file = document.getElementById("wallpaperFile").files[0];
+    let val = document.getElementById("wallpaperInput").value;
+
+    if (file) {
+        let r = new FileReader();
+        r.onload = e => applyWallpaper(e.target.result);
+        r.readAsDataURL(file);
+        return;
+    }
+
+    applyWallpaper(val);
+}
+
+function applyWallpaper(val) {
+    if (!val) return;
+
+    let d = document.getElementById("desktop");
+
+    if (val.startsWith("http") || val.startsWith("data:")) {
+        d.style.background = `url(${val}) center/cover`;
+    } else {
+        d.style.background = val;
+    }
+
+    localStorage.setItem("wallpaper", val);
+}
+
+// =========================
+// RIGHT CLICK MENU
+// =========================
+
+document.addEventListener("contextmenu", e => {
+    e.preventDefault();
+
+    let m = document.getElementById("contextMenu");
+    m.style.left = e.pageX + "px";
+    m.style.top = e.pageY + "px";
+    m.classList.remove("hidden");
+});
+
+document.addEventListener("click", () => {
+    document.getElementById("contextMenu").classList.add("hidden");
+});
+
+// =========================
+// INIT
+// =========================
+
+window.onload = () => {
+    renderFS();
+    boot();
+
+    let w = localStorage.getItem("wallpaper");
+    if (w) applyWallpaper(w);
+
+    updateTaskbar();
+};let fs = JSON.parse(localStorage.getItem("fs") || "[]");
 let currentFile = null;
 let dragTarget = null;
 let offsetX = 0;
