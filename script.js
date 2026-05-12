@@ -1,4 +1,243 @@
+
 // =========================
+// GLOBAL STATE (SAFE)
+// =========================
+
+window.OS = {
+    fs: JSON.parse(localStorage.getItem("fs") || "[]"),
+    aiMemory: JSON.parse(localStorage.getItem("aiMemory") || "[]"),
+    z: 10,
+    drag: { el: null, x:0, y:0 }
+};
+
+// =========================
+// WINDOW FACTORY (MULTI-INSTANCE)
+// =========================
+
+function openApp(type) {
+
+    const template = document.getElementById(type + "Template");
+    if (!template) return;
+
+    const win = template.cloneNode(true);
+    win.id = type + "_" + Date.now();
+    win.classList.remove("hidden");
+
+    win.style.left = (100 + Math.random()*200) + "px";
+    win.style.top = (100 + Math.random()*200) + "px";
+
+    document.getElementById("desktop").appendChild(win);
+
+    bring(win);
+    attach(win, type);
+    updateTaskbar();
+}
+
+// =========================
+// ATTACH LOGIC PER WINDOW
+// =========================
+
+function attach(win, type) {
+
+    const title = win.querySelector(".titlebar");
+    title.onmousedown = (e) => dragStart(e, win.id);
+
+    // CLOSE
+    win.querySelector(".close").onclick = () => {
+        win.remove();
+        updateTaskbar();
+    };
+
+    // MINIMIZE (browser only visually hides)
+    const min = win.querySelector(".min");
+    if (min) {
+        min.onclick = () => {
+            win.style.display = "none";
+            updateTaskbar();
+        };
+    }
+
+    // ================= BROWSER =================
+    if (type === "browser") {
+        const go = win.querySelector(".go");
+        const url = win.querySelector(".url");
+        const frame = win.querySelector(".frame");
+
+        go.onclick = () => {
+            let u = url.value;
+            if (!u.startsWith("http")) u = "https://" + u;
+            frame.src = u;
+        };
+    }
+
+    // ================= FILES =================
+    if (type === "files") {
+        const list = win.querySelector(".fileList");
+
+        win.querySelector(".newFile").onclick = () => {
+            let name = prompt("File name");
+            OS.fs.push({ type:"file", name, content:"" });
+            saveFS(); renderFS(list);
+        };
+
+        win.querySelector(".newFolder").onclick = () => {
+            let name = prompt("Folder name");
+            OS.fs.push({ type:"folder", name });
+            saveFS(); renderFS(list);
+        };
+
+        renderFS(list);
+    }
+
+    // ================= NOTES =================
+    if (type === "notes") {
+        const area = win.querySelector(".note");
+
+        win.querySelector(".save").onclick = () => {
+            OS.fs.push({ type:"note", content: area.value });
+            saveFS();
+        };
+    }
+
+    // ================= AI =================
+    if (type === "ai") {
+
+        const input = win.querySelector(".aiInput");
+        const out = win.querySelector(".aiOutput");
+
+        win.querySelector(".ask").onclick = () => {
+
+            const browserFrame = document.querySelector("iframe.frame");
+
+            let pageText = "";
+
+            try {
+                pageText = browserFrame?.contentDocument?.body?.innerText || "";
+            } catch {}
+
+            let q = input.value.toLowerCase();
+
+            let response = "";
+
+            if (q.includes("page")) {
+                response = pageText
+                    ? pageText.slice(0,300)
+                    : "Cannot access page (cross-origin).";
+            }
+
+            else if (q.includes("hello")) {
+                response = "Hello.";
+            }
+
+            else {
+                response = "AI: " + q.split(" ").reverse().join(" ");
+            }
+
+            out.innerText = response;
+        };
+    }
+}
+
+// =========================
+// DRAG SYSTEM (NO LET BUGS)
+// =========================
+
+function dragStart(e, id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    OS.drag.el = el;
+    OS.drag.x = e.clientX - el.offsetLeft;
+    OS.drag.y = e.clientY - el.offsetTop;
+}
+
+document.addEventListener("mousemove", e => {
+    if (!OS.drag.el) return;
+
+    OS.drag.el.style.left = (e.clientX - OS.drag.x) + "px";
+    OS.drag.el.style.top = (e.clientY - OS.drag.y) + "px";
+});
+
+document.addEventListener("mouseup", () => {
+    OS.drag.el = null;
+});
+
+// =========================
+// TASKBAR
+// =========================
+
+function updateTaskbar() {
+    const bar = document.getElementById("taskApps");
+    bar.innerHTML = "";
+
+    document.querySelectorAll(".window").forEach(w => {
+
+        const b = document.createElement("button");
+        b.innerText = w.id;
+
+        b.onclick = () => {
+            w.style.display = "block";
+            bring(w);
+        };
+
+        bar.appendChild(b);
+    });
+}
+
+// =========================
+// FILE SYSTEM
+// =========================
+
+function renderFS(list) {
+    list.innerHTML = "";
+
+    OS.fs.forEach((f,i) => {
+        const d = document.createElement("div");
+        d.innerText = f.type + ": " + (f.name || "untitled");
+        list.appendChild(d);
+    });
+}
+
+function saveFS() {
+    localStorage.setItem("fs", JSON.stringify(OS.fs));
+}
+
+// =========================
+// WALLPAPER
+// =========================
+
+function setWallpaper() {
+    const file = document.getElementById("wallpaperFile").files[0];
+    const val = document.getElementById("wallpaperInput").value;
+
+    if (file) {
+        const r = new FileReader();
+        r.onload = e => applyWallpaper(e.target.result);
+        r.readAsDataURL(file);
+        return;
+    }
+
+    applyWallpaper(val);
+}
+
+function applyWallpaper(val) {
+    const d = document.getElementById("desktop");
+    if (!val) return;
+
+    if (val.startsWith("http") || val.startsWith("data:")) {
+        d.style.background = `url(${val}) center/cover`;
+    } else {
+        d.style.background = val;
+    }
+}
+
+// =========================
+// Z-INDEX
+// =========================
+
+function bring(el) {
+    el.style.zIndex = ++OS.z;
+}// =========================
 // GLOBAL OS STATE
 // =========================
 
