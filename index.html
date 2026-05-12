@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Mini Browser</title>
+
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+<body class="theme-blue">
+
+<div id="browserWindow">
+
+    <!-- TOP BAR (DRAG HANDLE) -->
+    <div id="topbar">
+
+        <button onclick="newTab()">+</button>
+
+        <input id="urlInput" type="text" placeholder="Enter URL or search">
+
+        <button onclick="goToUrl()">Go</button>
+
+        <button onclick="addBookmark()">★</button>
+
+    </div>
+
+    <!-- THEMES -->
+    <div id="themeBar">
+
+        <button onclick="setTheme('theme-blue')">Blue</button>
+        <button onclick="setTheme('theme-purple')">Purple</button>
+        <button onclick="setTheme('theme-black')">Black</button>
+        <button onclick="setTheme('theme-white')">White</button>
+
+    </div>
+
+    <!-- BACKGROUND PICKER -->
+    <div id="bgBar">
+
+        <input id="bgInput" type="text" placeholder="Background color or image URL">
+
+        <button onclick="setBackground()">Set Background</button>
+
+    </div>
+
+    <!-- TABS -->
+    <div id="tabs"></div>
+
+    <!-- BROWSER -->
+    <iframe id="browserFrame"></iframe>
+
+    <!-- PANELS -->
+    <div id="panels">
+
+        <div class="panel">
+            <h3>Bookmarks</h3>
+            <ul id="bookmarkList"></ul>
+        </div>
+
+        <div class="panel">
+            <h3>Downloads</h3>
+            <button onclick="fakeDownload()">Download File</button>
+            <ul id="downloadList"></ul>
+        </div>
+
+        <div class="panel">
+            <h3>Fake AI</h3>
+            <button onclick="randomAI()">Generate</button>
+            <p id="aiOutput">AI ready...</p>
+        </div>
+
+    </div>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
