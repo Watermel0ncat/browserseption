@@ -4,6 +4,99 @@ body {
     font-family:Segoe UI, Arial;
 }
 
+#boot {
+    position:fixed;
+    inset:0;
+    background:black;
+    color:lime;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+    z-index:9999;
+}
+
+#desktop {
+    width:100vw;
+    height:100vh;
+    background:#0f172a;
+}
+
+#icons {
+    position:absolute;
+    top:20px;
+    left:20px;
+    color:white;
+}
+
+#icons div {
+    padding:10px;
+    margin:8px;
+    background:rgba(255,255,255,0.15);
+    cursor:pointer;
+    border-radius:6px;
+}
+
+.window {
+    position:absolute;
+    width:520px;
+    height:360px;
+    background:#1e1e1e;
+    color:white;
+    border-radius:10px;
+    overflow:hidden;
+}
+
+.hidden { display:none; }
+
+.titlebar {
+    background:#333;
+    padding:6px;
+    display:flex;
+    justify-content:space-between;
+    cursor:move;
+}
+
+#taskbar {
+    position:fixed;
+    bottom:0;
+    width:100%;
+    height:40px;
+    background:#111;
+    display:flex;
+    align-items:center;
+}
+
+#taskApps button {
+    margin-left:5px;
+}
+
+#fileList div {
+    padding:5px;
+    cursor:pointer;
+}
+
+#wallpaperPanel {
+    position:absolute;
+    bottom:50px;
+    left:20px;
+    background:rgba(0,0,0,0.5);
+    padding:10px;
+    color:white;
+}
+
+#contextMenu {
+    position:absolute;
+    background:#222;
+    color:white;
+    padding:10px;
+    border-radius:6px;
+}body {
+    margin:0;
+    overflow:hidden;
+    font-family:Segoe UI, Arial;
+}
+
 /* BOOT */
 
 #boot {
