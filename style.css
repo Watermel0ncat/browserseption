@@ -40,6 +40,85 @@ body {
 
 .hidden { display:none; }
 
+.titlebar {
+    background:#333;
+    padding:6px;
+    display:flex;
+    justify-content:space-between;
+    cursor:move;
+}
+
+/* TASKBAR */
+#taskbar {
+    position:fixed;
+    bottom:0;
+    width:100%;
+    height:40px;
+    background:#111;
+    display:flex;
+    align-items:center;
+}
+
+#taskApps button {
+    margin-left:5px;
+}
+
+/* WALLPAPER */
+#wallpaperPanel {
+    position:absolute;
+    bottom:50px;
+    left:20px;
+    background:rgba(0,0,0,0.5);
+    padding:10px;
+    color:white;
+}
+
+/* FILE LIST */
+.fileList div {
+    padding:4px;
+    cursor:pointer;
+}body {
+    margin:0;
+    overflow:hidden;
+    font-family:Segoe UI, Arial;
+}
+
+#desktop {
+    width:100vw;
+    height:100vh;
+    background:#0f172a;
+}
+
+/* ICONS */
+#icons {
+    position:absolute;
+    top:20px;
+    left:20px;
+    color:white;
+}
+
+#icons div {
+    padding:10px;
+    margin:8px;
+    background:rgba(255,255,255,0.15);
+    cursor:pointer;
+    border-radius:6px;
+}
+
+/* WINDOWS */
+.window {
+    position:absolute;
+    width:520px;
+    height:360px;
+    background:#1e1e1e;
+    color:white;
+    border-radius:10px;
+    overflow:auto;
+    resize: both;
+}
+
+.hidden { display:none; }
+
 /* TITLEBAR */
 .titlebar {
     background:#333;
