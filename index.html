@@ -9,16 +9,8 @@
 
 <body>
 
-<!-- BOOT -->
-<div id="boot">
-    <h1>MiniOS</h1>
-    <p id="bootText">Starting system...</p>
-</div>
-
-<!-- DESKTOP -->
 <div id="desktop">
 
-    <!-- ICONS -->
     <div id="icons">
         <div onclick="openApp('browser')">🌐 Browser</div>
         <div onclick="openApp('files')">📁 Files</div>
@@ -26,7 +18,6 @@
         <div onclick="openApp('ai')">🤖 AI</div>
     </div>
 
-    <!-- WALLPAPER -->
     <div id="wallpaperPanel">
         <input id="wallpaperInput" placeholder="Color or URL">
         <input type="file" id="wallpaperFile">
@@ -38,12 +29,9 @@
     <div class="window hidden" id="browserWindow">
         <div class="titlebar" onmousedown="dragStart(event,'browserWindow')">
             <span>Browser</span>
-            <div>
-                <button onclick="minimize('browserWindow')">_</button>
-                <button onclick="closeWindow('browserWindow')">x</button>
-            </div>
+            <button onclick="minimize('browserWindow')">_</button>
+            <button onclick="closeWindow('browserWindow')">x</button>
         </div>
-
         <input id="url">
         <button onclick="go()">Go</button>
         <iframe id="frame"></iframe>
@@ -84,13 +72,11 @@
 
 </div>
 
-<!-- TASKBAR -->
 <div id="taskbar">
     <button onclick="toggleStart()">Start</button>
     <div id="taskApps"></div>
 </div>
 
-<!-- CONTEXT MENU -->
 <div id="contextMenu" class="hidden">
     <div onclick="setWallpaperPrompt()">Wallpaper</div>
     <div onclick="createFolder()">New Folder</div>
