@@ -2,32 +2,34 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>MiniOS Ultimate</title>
+<title>MiniOS Ultimate Stable</title>
 <link rel="stylesheet" href="style.css">
 <script defer src="script.js"></script>
 </head>
 
 <body>
 
-<!-- ROOT DESKTOP (REQUIRED — THIS WAS LIKELY YOUR ISSUE) -->
+<!-- DESKTOP ROOT (REQUIRED) -->
 <div id="desktop"></div>
 
-<!-- TASKBAR (ALWAYS VISIBLE) -->
+<!-- TASKBAR -->
 <div id="taskbar">
+    <button onclick="openApp('browser')">Browser</button>
+    <button onclick="openApp('ai')">AI</button>
     <div id="taskApps"></div>
 </div>
 
 <!-- ===================== -->
-<!-- APP TEMPLATES (CRITICAL) -->
-<!-- THESE MUST EXIST FOR WINDOWS TO SPAWN -->
+<!-- TEMPLATES (MUST EXIST) -->
 <!-- ===================== -->
 
-<!-- BROWSER -->
-<div id="browserTemplate" class="window hidden template">
+<div id="browserTemplate" class="window hidden">
     <div class="titlebar">
         <span>Browser</span>
-        <button class="min">_</button>
-        <button class="close">x</button>
+        <div>
+            <button class="min">_</button>
+            <button class="close">x</button>
+        </div>
     </div>
 
     <input class="url" placeholder="https://example.com">
@@ -35,43 +37,18 @@
     <iframe class="frame"></iframe>
 </div>
 
-<!-- AI -->
-<div id="aiTemplate" class="window hidden template">
+<div id="aiTemplate" class="window hidden">
     <div class="titlebar">
         <span>AI</span>
-        <button class="min">_</button>
-        <button class="close">x</button>
+        <div>
+            <button class="min">_</button>
+            <button class="close">x</button>
+        </div>
     </div>
 
-    <input class="aiInput" placeholder="Ask AI...">
+    <input class="aiInput" placeholder="Ask...">
     <button class="ask">Ask</button>
     <div class="aiOutput"></div>
-</div>
-
-<!-- FILES (optional but safe to include) -->
-<div id="filesTemplate" class="window hidden template">
-    <div class="titlebar">
-        <span>Files</span>
-        <button class="min">_</button>
-        <button class="close">x</button>
-    </div>
-
-    <button class="newFile">New File</button>
-    <button class="newFolder">New Folder</button>
-
-    <div class="fileList"></div>
-</div>
-
-<!-- NOTES (optional) -->
-<div id="notesTemplate" class="window hidden template">
-    <div class="titlebar">
-        <span>Notes</span>
-        <button class="min">_</button>
-        <button class="close">x</button>
-    </div>
-
-    <textarea class="note"></textarea>
-    <button class="save">Save</button>
 </div>
 
 </body>
